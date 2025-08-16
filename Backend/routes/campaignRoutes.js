@@ -1,6 +1,6 @@
-const express = require("express");
-const { listCampaigns, createCampaign } = require("../controllers/campaignController");
-const authMiddleware = require("../middleware/authMiddleware");
+import express from "express";
+import authMiddleware from "../middleware/authMiddleware.js";
+import { listCampaigns, createCampaign, updateCampaign, deleteCampaign } from "../controllers/campaignController.js";
 const router = express.Router();
 
 router.use(authMiddleware); 
@@ -10,4 +10,4 @@ router.post("/", createCampaign);
 router.put("/:id", updateCampaign);    
 router.delete("/:id", deleteCampaign); 
 
-module.exports = router;
+export default router;

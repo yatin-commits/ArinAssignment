@@ -1,4 +1,4 @@
-const { getCampaigns, addCampaign } = require("../models/CampaignModel");
+import { getCampaigns, addCampaign } from "../models/CampaignModel.js";
 
 const listCampaigns = async (req, res) => {
   const userId = req.user.id;
@@ -66,4 +66,4 @@ const createCampaign = async (req, res) => {
   }
 };
 
-module.exports = { listCampaigns, createCampaign };
+export { listCampaigns, createCampaign, deleteCampaign, updateCampaign };

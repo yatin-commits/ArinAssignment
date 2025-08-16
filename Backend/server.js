@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
+import dotenv from 'dotenv';
 dotenv.config();
 
 
-import authRoutes from './routes/auth.js';
-import campaignRoutes from './routes/campaigns.js';
+import authRoutes from './routes/authRoutes.js';
+import campaignRoutes from './routes/campaignRoutes.js';
 
 const app = express();
 app.use(cors());

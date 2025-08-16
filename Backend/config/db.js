@@ -1,5 +1,5 @@
 import mysql from 'mysql2';
-const dotenv = require("dotenv");
+import dotenv from 'dotenv';
 dotenv.config();
 
 const connection = mysql.createPool({
@@ -9,4 +9,4 @@ const connection = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-module.exports = connection;
+export default connection;

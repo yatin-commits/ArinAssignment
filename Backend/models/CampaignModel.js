@@ -1,4 +1,4 @@
-const db = require("../config/db");
+import db from "../config/db.js";
 
 const getCampaigns = (userId, filter) => {
   return new Promise((resolve, reject) => {
@@ -29,4 +29,4 @@ const addCampaign = (data, userId) => {
   });
 };
 
-module.exports = { getCampaigns, addCampaign };
+export { getCampaigns, addCampaign };
