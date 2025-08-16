@@ -9,7 +9,7 @@ import Dashboard from "./Pages/Dashboard";
 const App = () => {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <Navbar />
       <Routes>
         <Route path="/login" element={<Login />} />

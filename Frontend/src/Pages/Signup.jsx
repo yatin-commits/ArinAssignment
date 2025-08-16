@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   
@@ -19,9 +19,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!validatePassword(password)) {
-    setError(
-      "Password must be at least 6 characters, include 1 uppercase letter and 1 number."
-    );
+    toast.error("Password must be at least 6 characters, include 1 uppercase letter and 1 number.");
     return;
   }
   try {
@@ -30,9 +28,10 @@ const handleSubmit = async (e) => {
       email,
       password,
     });
+    toast.success("Signup successful! Please login.");
     navigate("/login");
   } catch (err) {
-    setError(err.response?.data?.message || "Signup failed");
+    toast.error(err.response?.data?.message || "Signup failed");
   }
 };
 
@@ -44,8 +43,6 @@ const handleSubmit = async (e) => {
         className="bg-white p-8 rounded-xl shadow-md w-96"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
-
-        {error && <p className="text-red-500 mb-3">{error}</p>}
 
         <input
           type="text"
