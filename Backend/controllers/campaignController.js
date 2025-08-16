@@ -1,4 +1,4 @@
-import { getCampaigns, addCampaign } from "../models/CampaignModel.js";
+import { getCampaigns, addCampaign, updateCampaign, deleteCampaign } from "../models/CampaignModel.js";
 
 const listCampaigns = async (req, res) => {
   const userId = req.user.id;
@@ -11,45 +11,33 @@ const listCampaigns = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch campaigns" });
   }
 };
-const updateCampaign = async (req, res) => {
+const updateCampaignHandler = async (req, res) => {
   const campaignId = req.params.id;
   const userId = req.user.id;
   const { campaign_name, date, impressions, clicks, conversions } = req.body;
 
   try {
-    const sql = `
-      UPDATE campaigns
-      SET campaign_name = ?, date = ?, impressions = ?, clicks = ?, conversions = ?
-      WHERE id = ? AND user_id = ?
-    `;
-    db.query(
-      sql,
-      [campaign_name, date, impressions, clicks, conversions, campaignId, userId],
-      (err, results) => {
-        if (err) return res.status(500).json({ message: "Failed to update campaign" });
-        if (results.affectedRows === 0)
-          return res.status(404).json({ message: "Campaign not found or not authorized" });
-        res.json({ message: "Campaign updated successfully" });
-      }
-    );
+    const result = await updateCampaign({ campaign_name, date, impressions, clicks, conversions }, campaignId, userId);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Campaign not found or unauthorized" });
+    }
+    res.json({ message: "Campaign updated successfully" });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
-const deleteCampaign = async (req, res) => {
+const deleteCampaignHandler = async (req, res) => {
   const campaignId = req.params.id;
   const userId = req.user.id;
 
   try {
-    const sql = "DELETE FROM campaigns WHERE id = ? AND user_id = ?";
-    db.query(sql, [campaignId, userId], (err, results) => {
-      if (err) return res.status(500).json({ message: "Failed to delete campaign" });
-      if (results.affectedRows === 0)
-        return res.status(404).json({ message: "Campaign not found or not authorized" });
-      res.json({ message: "Campaign deleted successfully" });
-    });
+    const result = await deleteCampaign(campaignId, userId);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Campaign not found or unauthorized" });
+    }
+    res.json({ message: "Campaign deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Failed to delete campaign" });
   }
 };
 
@@ -66,4 +54,4 @@ const createCampaign = async (req, res) => {
   }
 };
 
-export { listCampaigns, createCampaign, deleteCampaign, updateCampaign };
+export { listCampaigns, createCampaign, deleteCampaignHandler as deleteCampaign, updateCampaignHandler as updateCampaign };

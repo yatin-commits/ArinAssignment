@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -11,8 +12,8 @@ const Dashboard = () => {
     clicks: "",
     conversions: "",
   });
-  const [error, setError] = useState("");
-
+  const [editingCampaign, setEditingCampaign] = useState(null);
+  
   const token = localStorage.getItem("token");
 
   const fetchCampaigns = async () => {
@@ -23,13 +24,13 @@ const Dashboard = () => {
       );
       setCampaigns(res.data);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch campaigns");
+      toast.error(err.response?.data?.message || "Failed to fetch campaigns");
     }
   };
 
   useEffect(() => {
     fetchCampaigns();
-  }, [filter]);
+  }, [filter, token]);
 
   const handleInputChange = (e) => {
     setNewCampaign({ ...newCampaign, [e.target.name]: e.target.value });
@@ -48,9 +49,63 @@ const Dashboard = () => {
         clicks: "",
         conversions: "",
       });
-      fetchCampaigns();
+      await fetchCampaigns();
+      toast.success("Campaign added successfully!");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to add campaign");
+      toast.error(err.response?.data?.message || "Failed to add campaign");
+    }
+  };
+
+  const handleEdit = (campaign) => {
+    setEditingCampaign(campaign);
+    // Format the date to YYYY-MM-DD for the date input
+    const formattedDate = campaign.date ? new Date(campaign.date).toISOString().split('T')[0] : '';
+    setNewCampaign({
+      campaign_name: campaign.campaign_name,
+      date: formattedDate,
+      impressions: campaign.impressions,
+      clicks: campaign.clicks,
+      conversions: campaign.conversions,
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(
+        `http://localhost:5000/api/campaigns/${editingCampaign.id}`,
+        newCampaign,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setEditingCampaign(null);
+      setNewCampaign({
+        campaign_name: "",
+        date: "",
+        impressions: "",
+        clicks: "",
+        conversions: "",
+      });
+      await fetchCampaigns();
+      toast.success("Campaign updated successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update campaign");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this campaign?")) {
+      return;
+    }
+    try {
+      await axios.delete(`http://localhost:5000/api/campaigns/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await fetchCampaigns();
+      toast.success("Campaign deleted successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete campaign");
     }
   };
 
@@ -68,7 +123,7 @@ const Dashboard = () => {
 
       
       <form
-        onSubmit={handleAddCampaign}
+        onSubmit={editingCampaign ? handleUpdate : handleAddCampaign}
         className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-5 gap-3"
       >
         <input
@@ -115,16 +170,37 @@ const Dashboard = () => {
           required
           className="border px-2 py-1 rounded"
         />
-        <button
-          type="submit"
-          className="col-span-full bg-green-500 hover:bg-green-600 text-white py-2 rounded font-semibold"
-        >
-          Add Campaign
-        </button>
+        <div className="col-span-full flex gap-2">
+          <button
+            type="submit"
+            className={`flex-1 py-2 rounded font-semibold text-white ${
+              editingCampaign
+                ? "bg-blue-500 hover:bg-blue-600"
+                : "bg-green-500 hover:bg-green-600"
+            }`}
+          >
+            {editingCampaign ? "Update Campaign" : "Add Campaign"}
+          </button>
+          {editingCampaign && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCampaign(null);
+                setNewCampaign({
+                  campaign_name: "",
+                  date: "",
+                  impressions: "",
+                  clicks: "",
+                  conversions: "",
+                });
+              }}
+              className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded font-semibold"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
-
-      {/* Error */}
-      {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {/* Campaign Table */}
       <div className="overflow-x-auto bg-white rounded shadow">
@@ -136,6 +212,7 @@ const Dashboard = () => {
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Impressions</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Clicks</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Conversions</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -146,11 +223,25 @@ const Dashboard = () => {
                 <td className="px-4 py-2">{c.impressions}</td>
                 <td className="px-4 py-2">{c.clicks}</td>
                 <td className="px-4 py-2">{c.conversions}</td>
+                <td className="px-4 py-2 space-x-2">
+                  <button
+                    onClick={() => handleEdit(c)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
             {campaigns.length === 0 && (
               <tr>
-                <td colSpan="5" className="px-4 py-2 text-center text-gray-500">
+                <td colSpan="6" className="px-4 py-2 text-center text-gray-500">
                   No campaigns found.
                 </td>
               </tr>

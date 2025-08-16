@@ -29,4 +29,31 @@ const addCampaign = (data, userId) => {
   });
 };
 
-export { getCampaigns, addCampaign };
+const updateCampaign = (data, campaignId, userId) => {
+  const { campaign_name, date, impressions, clicks, conversions } = data;
+  return new Promise((resolve, reject) => {
+    db.query(
+      "UPDATE campaigns SET campaign_name = ?, date = ?, impressions = ?, clicks = ?, conversions = ? WHERE id = ? AND user_id = ?",
+      [campaign_name, date, impressions, clicks, conversions, campaignId, userId],
+      (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      }
+    );
+  });
+};
+
+const deleteCampaign = (campaignId, userId) => {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "DELETE FROM campaigns WHERE id = ? AND user_id = ?",
+      [campaignId, userId],
+      (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      }
+    );
+  });
+};
+
+export { getCampaigns, addCampaign, updateCampaign, deleteCampaign };
