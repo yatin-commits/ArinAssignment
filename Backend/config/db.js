@@ -1,5 +1,4 @@
 import mysql from "mysql2";
-import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -10,8 +9,8 @@ const connection = mysql.createPool({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT || 3306,
   ssl: {
-    ca: fs.readFileSync('./config/ca.pem'),
-    rejectUnauthorized: true,
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
   },
   connectionLimit: 10,
   connectTimeout: 30000,
