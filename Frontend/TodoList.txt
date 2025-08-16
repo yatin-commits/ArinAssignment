@@ -1,0 +1,6 @@
+[✔️] Setup React project with routing & create NavBar
+[ ] Create Login and Signup pages
+[ ] Create Dashboard to list campaigns
+[ ] Add form to create new campaign
+[ ] Add filter option by campaign name
+[ ] Implement logout functionality
