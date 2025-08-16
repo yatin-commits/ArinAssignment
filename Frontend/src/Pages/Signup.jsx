@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -23,7 +24,7 @@ const handleSubmit = async (e) => {
     return;
   }
   try {
-    await axios.post("http://localhost:5000/api/auth/signup", {
+    await axios.post(`${API_BASE_URL}/auth/signup`, {
       name,
       email,
       password,

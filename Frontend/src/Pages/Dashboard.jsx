@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 const Dashboard = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -19,7 +20,7 @@ const Dashboard = () => {
   const fetchCampaigns = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/campaigns?name=${filter}`,
+        `${API_BASE_URL}/campaigns?name=${filter}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCampaigns(res.data);
@@ -39,7 +40,7 @@ const Dashboard = () => {
   const handleAddCampaign = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/campaigns", newCampaign, {
+      await axios.post(`${API_BASE_URL}/campaigns`, newCampaign, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNewCampaign({
@@ -73,7 +74,7 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/campaigns/${editingCampaign.id}`,
+        `${API_BASE_URL}/campaigns/${editingCampaign.id}`,
         newCampaign,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -99,7 +100,7 @@ const Dashboard = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:5000/api/campaigns/${id}`, {
+      await axios.delete(`${API_BASE_URL}/campaigns/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchCampaigns();
