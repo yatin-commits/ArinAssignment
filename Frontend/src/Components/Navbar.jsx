@@ -19,9 +19,8 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-900 text-white px-6 py-3 flex justify-between items-center shadow-md">
       
-      <h2 className="text-xl font-bold">Campaign Tracker</h2>
+      <Link to="/" className="text-xl font-bold hover:text-gray-300">Campaign Tracker</Link>
 
-      
       <div className="flex gap-6 items-center">
         {!isLoggedIn ? (
           <>
