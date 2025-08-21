@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./Components/Navbar";
-import ProtectedRoute from "./Components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
@@ -23,12 +23,15 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <Dashboard />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
 
+
+
+        {/* Catch all route - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

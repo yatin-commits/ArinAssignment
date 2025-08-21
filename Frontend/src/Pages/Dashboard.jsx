@@ -14,6 +14,7 @@ const Dashboard = () => {
     conversions: "",
   });
   const [editingCampaign, setEditingCampaign] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   
   const token = localStorage.getItem("token");
 
@@ -37,6 +38,16 @@ const Dashboard = () => {
     setNewCampaign({ ...newCampaign, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+    } else {
+      toast.error("Please select a valid image file");
+      setSelectedImage(null);
+    }
+  };
+
   const handleAddCampaign = async (e) => {
     e.preventDefault();
     try {
@@ -50,24 +61,12 @@ const Dashboard = () => {
         clicks: "",
         conversions: "",
       });
+      setSelectedImage(null);
       await fetchCampaigns();
       toast.success("Campaign added successfully!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add campaign");
     }
-  };
-
-  const handleEdit = (campaign) => {
-    setEditingCampaign(campaign);
-    // Format the date to YYYY-MM-DD for the date input
-    const formattedDate = campaign.date ? new Date(campaign.date).toISOString().split('T')[0] : '';
-    setNewCampaign({
-      campaign_name: campaign.campaign_name,
-      date: formattedDate,
-      impressions: campaign.impressions,
-      clicks: campaign.clicks,
-      conversions: campaign.conversions,
-    });
   };
 
   const handleUpdate = async (e) => {
@@ -88,6 +87,7 @@ const Dashboard = () => {
         clicks: "",
         conversions: "",
       });
+      setSelectedImage(null);
       await fetchCampaigns();
       toast.success("Campaign updated successfully!");
     } catch (err) {
@@ -110,6 +110,125 @@ const Dashboard = () => {
     }
   };
 
+  const handleImageSubmit = () => {
+    if (!selectedImage) {
+      toast.error("Please select an image first");
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(selectedImage);
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>Image Preview</title>
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100vh;
+              overflow: hidden;
+              background: #000;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: relative;
+            }
+            #imageContainer {
+              position: relative;
+              width: 100vw;
+              height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+            #image {
+              width: 100vw;
+              height: 100vh;
+              object-fit: contain;
+              display: block;
+            }
+            #likeContainer {
+              position: absolute;
+              top: 50%;
+              right: 20px;
+              transform: translateY(-50%);
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 10px;
+              background: rgba(0, 0, 0, 0.7);
+              padding: 10px;
+              border-radius: 10px;
+              z-index: 1000;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+            #likeBtn {
+              padding: 8px;
+              background: #ff4d4f;
+              color: white;
+              border: none;
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 20px;
+              width: 40px;
+              height: 40px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              transition: background 0.2s;
+            }
+            #likeBtn:hover {
+              background: #e6393d;
+            }
+            #likeBtn::before {
+              content: '❤️';
+              font-size: 24px;
+            }
+            #likeCount {
+              color: white;
+              font-size: 16px;
+              font-family: Arial, sans-serif;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="imageContainer">
+            <img id="image" src="${imageUrl}" alt="Selected Image" />
+            <div id="likeContainer">
+              <button id="likeBtn"></button>
+              <span id="likeCount">0</span>
+            </div>
+          </div>
+          <script>
+            let likeCount = 0;
+            const likeBtn = document.getElementById('likeBtn');
+            const likeCountDisplay = document.getElementById('likeCount');
+            const imageContainer = document.getElementById('imageContainer');
+            likeBtn.addEventListener('click', () => {
+              likeCount++;
+              likeCountDisplay.textContent = likeCount;
+              if (imageContainer.requestFullscreen) {
+                imageContainer.requestFullscreen();
+              } else if (imageContainer.webkitRequestFullscreen) {
+                imageContainer.webkitRequestFullscreen();
+              } else if (imageContainer.msRequestFullscreen) {
+                imageContainer.msRequestFullscreen();
+              }
+            });
+            document.getElementById('image').onerror = () => {
+              alert('Failed to load the image. Please try again.');
+              window.close();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+  };
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
@@ -122,10 +241,8 @@ const Dashboard = () => {
         className="mb-6 px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
 
-      
-      <form
-        onSubmit={editingCampaign ? handleUpdate : handleAddCampaign}
-        className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-5 gap-3"
+      <div
+        className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-6 gap-3"
       >
         <input
           type="text"
@@ -171,9 +288,16 @@ const Dashboard = () => {
           required
           className="border px-2 py-1 rounded"
         />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="border px-2 py-1 rounded"
+        />
         <div className="col-span-full flex gap-2">
           <button
-            type="submit"
+            type="button"
+            onClick={editingCampaign ? handleUpdate : handleAddCampaign}
             className={`flex-1 py-2 rounded font-semibold text-white ${
               editingCampaign
                 ? "bg-blue-500 hover:bg-blue-600"
@@ -181,6 +305,13 @@ const Dashboard = () => {
             }`}
           >
             {editingCampaign ? "Update Campaign" : "Add Campaign"}
+          </button>
+          <button
+            type="button"
+            onClick={handleImageSubmit}
+            className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded font-semibold"
+          >
+            Submit Image
           </button>
           {editingCampaign && (
             <button
@@ -194,6 +325,7 @@ const Dashboard = () => {
                   clicks: "",
                   conversions: "",
                 });
+                setSelectedImage(null);
               }}
               className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded font-semibold"
             >
@@ -201,9 +333,8 @@ const Dashboard = () => {
             </button>
           )}
         </div>
-      </form>
+      </div>
 
-      {/* Campaign Table */}
       <div className="overflow-x-auto bg-white rounded shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
