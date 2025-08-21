@@ -2,7 +2,8 @@ import React from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./Components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import FullscreenView from "./Components/FullscreenView";
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
@@ -29,7 +30,15 @@ const App = () => {
           }
         />
 
-
+        {/* Fullscreen View Route */}
+        <Route
+          path="/view/:campaignId"
+          element={
+            <ProtectedRoute>
+              <FullscreenView />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Catch all route - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
